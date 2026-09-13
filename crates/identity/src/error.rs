@@ -81,6 +81,31 @@ pub enum InceptionVerificationError {
 
 #[non_exhaustive]
 #[derive(Debug, Error)]
+pub enum EventVerificationError {
+    #[error(transparent)]
+    Encode(#[from] EncodeError),
+    #[error("identity is deactivated")]
+    Deactivated,
+    #[error("event identity does not match current state")]
+    IdentityMismatch,
+    #[error("identity sequence is exhausted")]
+    SequenceExhausted,
+    #[error("event sequence does not immediately follow current state")]
+    UnexpectedSequence,
+    #[error("event previous ID does not match current state")]
+    PreviousMismatch,
+    #[error("signature count {actual} does not meet threshold {threshold}")]
+    InsufficientSignatures { threshold: u16, actual: usize },
+    #[error("signature key index {index} is out of range for {key_count} keys")]
+    KeyIndexOutOfRange { index: u16, key_count: usize },
+    #[error("control key at index {key_index} is not a valid public key")]
+    InvalidPublicKey { key_index: u16 },
+    #[error("invalid signature for control key index {key_index}")]
+    InvalidSignature { key_index: u16 },
+}
+
+#[non_exhaustive]
+#[derive(Debug, Error)]
 pub enum IdentityStateError {
     #[error("control key at index {index} is not a valid public key")]
     InvalidControlPublicKey { index: usize },
@@ -101,10 +126,24 @@ pub enum IdentityStateError {
 pub enum ApplyError {
     #[error(transparent)]
     EventId(#[from] EncodeError),
+    #[error("could not derive device ID: {0}")]
+    DeviceId(EncodeError),
     #[error(transparent)]
     State(#[from] IdentityStateError),
     #[error(transparent)]
     InceptionVerification(#[from] InceptionVerificationError),
+    #[error(transparent)]
+    EventVerification(#[from] EventVerificationError),
     #[error("expected an inception event")]
     ExpectedInception,
+    #[error("expected an ordinary event")]
+    ExpectedOrdinary,
+    #[error("could not verify control-key commitment: {0}")]
+    Commitment(EncodeError),
+    #[error("revealed control keys do not match the current commitment")]
+    CommitmentMismatch,
+    #[error("device is already authorized")]
+    DeviceAlreadyAuthorized,
+    #[error("device is not authorized")]
+    DeviceNotAuthorized,
 }

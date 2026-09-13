@@ -1,8 +1,9 @@
 use p256::ecdsa::signature::Verifier as _;
 
 use crate::{
-    IdentityId, InceptionVerificationError, KeySet, KeySignature, PublicKey, Signature,
-    SignedInception, derive_identity_id, derive_inception_signature_target,
+    EventVerificationError, IdentityAction, IdentityId, IdentityState, InceptionVerificationError,
+    KeySet, KeySignature, PublicKey, Signature, SignedInception, SignedOrdinaryEvent,
+    derive_event_signature_target, derive_identity_id, derive_inception_signature_target,
 };
 
 /// Verifies a signed inception's control-key signatures and returns the resulting identity ID.
@@ -17,14 +18,62 @@ pub fn verify_signed_inception(
     Ok(derive_identity_id(inception.inception())?)
 }
 
+/// Verifies a signed ordinary event against an identity's current state, checking sequencing,
+/// linkage, and control-key signatures.
+pub fn verify_signed_ordinary_event(
+    state: &IdentityState,
+    signed: &SignedOrdinaryEvent,
+) -> Result<(), EventVerificationError> {
+    let event = signed.event();
+
+    if state.is_deactivated() {
+        return Err(EventVerificationError::Deactivated);
+    }
+
+    if event.identity() != state.id() {
+        return Err(EventVerificationError::IdentityMismatch);
+    }
+
+    let expected = state
+        .sequence()
+        .checked_next()
+        .ok_or(EventVerificationError::SequenceExhausted)?;
+
+    if event.sequence() != expected {
+        return Err(EventVerificationError::UnexpectedSequence);
+    }
+
+    if event.previous() != state.latest_event() {
+        return Err(EventVerificationError::PreviousMismatch);
+    }
+
+    let control = match event.action() {
+        IdentityAction::RotateControl(rotation) => rotation.control(),
+        _ => state.control(),
+    };
+
+    if signed.signatures().len() < usize::from(control.threshold()) {
+        return Err(EventVerificationError::InsufficientSignatures {
+            threshold: control.threshold(),
+            actual: signed.signatures().len(),
+        });
+    }
+
+    let target = derive_event_signature_target(event)?;
+
+    verify_key_signatures(control, target.as_bytes(), signed.signatures())?;
+
+    Ok(())
+}
+
 fn verify_key_signatures(
     control: &KeySet,
     target: &[u8],
     signatures: &[KeySignature],
-) -> Result<(), InceptionVerificationError> {
+) -> Result<(), KeySignatureError> {
     for entry in signatures {
         let key = control.keys().get(usize::from(entry.key_index())).ok_or(
-            InceptionVerificationError::KeyIndexOutOfRange {
+            KeySignatureError::KeyIndexOutOfRange {
                 index: entry.key_index(),
                 key_count: control.keys().len(),
             },
@@ -34,7 +83,7 @@ fn verify_key_signatures(
             (PublicKey::Ed25519(key_bytes), Signature::Ed25519(sig_bytes)) => {
                 let verifying_key =
                     ed25519_dalek::VerifyingKey::from_bytes(key_bytes).map_err(|_| {
-                        InceptionVerificationError::InvalidPublicKey {
+                        KeySignatureError::InvalidPublicKey {
                             key_index: entry.key_index(),
                         }
                     })?;
@@ -42,35 +91,35 @@ fn verify_key_signatures(
 
                 verifying_key
                     .verify_strict(target, &signature)
-                    .map_err(|_| InceptionVerificationError::InvalidSignature {
+                    .map_err(|_| KeySignatureError::InvalidSignature {
                         key_index: entry.key_index(),
                     })?;
             }
             (PublicKey::P256(key_bytes), Signature::P256(sig_bytes)) => {
                 let verifying_key = p256::ecdsa::VerifyingKey::from_sec1_bytes(key_bytes.as_ref())
-                    .map_err(|_| InceptionVerificationError::InvalidPublicKey {
+                    .map_err(|_| KeySignatureError::InvalidPublicKey {
                         key_index: entry.key_index(),
                     })?;
                 let signature = p256::ecdsa::Signature::from_slice(sig_bytes).map_err(|_| {
-                    InceptionVerificationError::InvalidSignature {
+                    KeySignatureError::InvalidSignature {
                         key_index: entry.key_index(),
                     }
                 })?;
 
                 if signature.normalize_s() != signature {
-                    return Err(InceptionVerificationError::InvalidSignature {
+                    return Err(KeySignatureError::InvalidSignature {
                         key_index: entry.key_index(),
                     });
                 }
 
                 verifying_key.verify(target, &signature).map_err(|_| {
-                    InceptionVerificationError::InvalidSignature {
+                    KeySignatureError::InvalidSignature {
                         key_index: entry.key_index(),
                     }
                 })?;
             }
             _ => {
-                return Err(InceptionVerificationError::InvalidSignature {
+                return Err(KeySignatureError::InvalidSignature {
                     key_index: entry.key_index(),
                 });
             }
@@ -80,15 +129,58 @@ fn verify_key_signatures(
     Ok(())
 }
 
+enum KeySignatureError {
+    KeyIndexOutOfRange { index: u16, key_count: usize },
+    InvalidPublicKey { key_index: u16 },
+    InvalidSignature { key_index: u16 },
+}
+
+impl From<KeySignatureError> for InceptionVerificationError {
+    fn from(error: KeySignatureError) -> Self {
+        match error {
+            KeySignatureError::KeyIndexOutOfRange { index, key_count } => {
+                Self::KeyIndexOutOfRange { index, key_count }
+            }
+            KeySignatureError::InvalidPublicKey { key_index } => {
+                Self::InvalidPublicKey { key_index }
+            }
+            KeySignatureError::InvalidSignature { key_index } => {
+                Self::InvalidSignature { key_index }
+            }
+        }
+    }
+}
+
+impl From<KeySignatureError> for EventVerificationError {
+    fn from(error: KeySignatureError) -> Self {
+        match error {
+            KeySignatureError::KeyIndexOutOfRange { index, key_count } => {
+                Self::KeyIndexOutOfRange { index, key_count }
+            }
+            KeySignatureError::InvalidPublicKey { key_index } => {
+                Self::InvalidPublicKey { key_index }
+            }
+            KeySignatureError::InvalidSignature { key_index } => {
+                Self::InvalidSignature { key_index }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
     use ed25519_dalek::Signer as _;
 
     use crate::{
-        Inception, KeySignature, PublicKey, Signature as IdentitySignature, SignedInception,
+        AuthorizeDevice, EventId, IdentityAction, IdentityEvent, Inception, KeySignature,
+        PublicKey, RotateControl, Signature as IdentitySignature, SignedInception,
+        SignedOrdinaryEvent, apply_ordinary_event, derive_event_signature_target,
         derive_identity_id, derive_inception_signature_target, derive_next_key_commitment,
-        testing::{control_key, invalid_ed25519_public_key_bytes, keyset, sign, signing_key},
+        testing::{
+            control_key, genesis_state, invalid_ed25519_public_key_bytes, keyset, ordinary_event,
+            sign, signing_key,
+        },
     };
 
     use super::*;
@@ -373,6 +465,157 @@ mod tests {
             result,
             Err(InceptionVerificationError::InvalidSignature { key_index: 0 })
         ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_accepts_valid_event() -> Result<()> {
+        let (signer, state) = genesis_state(0x11)?;
+        let signed = ordinary_event(&state, IdentityAction::deactivate(), &signer)?;
+
+        verify_signed_ordinary_event(&state, signed.as_ordinary().unwrap())?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_rejects_deactivated_state() -> Result<()> {
+        let (signer, state) = genesis_state(0x11)?;
+        let deactivate = ordinary_event(&state, IdentityAction::deactivate(), &signer)?;
+        let deactivated = apply_ordinary_event(&state, &deactivate)?;
+        let next = ordinary_event(
+            &deactivated,
+            IdentityAction::authorize_device(AuthorizeDevice::new(control_key(&signing_key(0x22)))),
+            &signer,
+        )?;
+
+        let result = verify_signed_ordinary_event(&deactivated, next.as_ordinary().unwrap());
+
+        assert!(matches!(result, Err(EventVerificationError::Deactivated)));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_rejects_identity_mismatch() -> Result<()> {
+        let (signer, state) = genesis_state(0x11)?;
+        let (_, other_state) = genesis_state(0x33)?;
+        let signed = ordinary_event(&state, IdentityAction::deactivate(), &signer)?;
+
+        let result = verify_signed_ordinary_event(&other_state, signed.as_ordinary().unwrap());
+
+        assert!(matches!(
+            result,
+            Err(EventVerificationError::IdentityMismatch)
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_rejects_unexpected_sequence() -> Result<()> {
+        let (signer, state) = genesis_state(0x11)?;
+        let event = IdentityEvent::new(
+            *state.id(),
+            state
+                .sequence()
+                .checked_next()
+                .unwrap()
+                .checked_next()
+                .unwrap(),
+            *state.latest_event(),
+            IdentityAction::deactivate(),
+        );
+        let target = derive_event_signature_target(&event)?;
+        let signed = SignedOrdinaryEvent::new(event, vec![sign(0, &signer, target.as_bytes())])?;
+
+        let result = verify_signed_ordinary_event(&state, &signed);
+
+        assert!(matches!(
+            result,
+            Err(EventVerificationError::UnexpectedSequence)
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_rejects_previous_mismatch() -> Result<()> {
+        let (signer, state) = genesis_state(0x11)?;
+        let event = IdentityEvent::new(
+            *state.id(),
+            state.sequence().checked_next().unwrap(),
+            EventId::from_bytes([0xff; 32]),
+            IdentityAction::deactivate(),
+        );
+        let target = derive_event_signature_target(&event)?;
+        let signed = SignedOrdinaryEvent::new(event, vec![sign(0, &signer, target.as_bytes())])?;
+
+        let result = verify_signed_ordinary_event(&state, &signed);
+
+        assert!(matches!(
+            result,
+            Err(EventVerificationError::PreviousMismatch)
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_rejects_insufficient_signatures() -> Result<()> {
+        let (_signer, state) = genesis_state(0x11)?;
+        let event = IdentityEvent::new(
+            *state.id(),
+            state.sequence().checked_next().unwrap(),
+            *state.latest_event(),
+            IdentityAction::deactivate(),
+        );
+        let signed = SignedOrdinaryEvent::new(event, Vec::new())?;
+
+        let result = verify_signed_ordinary_event(&state, &signed);
+
+        assert!(matches!(
+            result,
+            Err(EventVerificationError::InsufficientSignatures {
+                threshold: 1,
+                actual: 0
+            })
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_rejects_invalid_signature() -> Result<()> {
+        let (_signer, state) = genesis_state(0x11)?;
+        let wrong_signer = signing_key(0x99);
+        let signed = ordinary_event(&state, IdentityAction::deactivate(), &wrong_signer)?;
+
+        let result = verify_signed_ordinary_event(&state, signed.as_ordinary().unwrap());
+
+        assert!(matches!(
+            result,
+            Err(EventVerificationError::InvalidSignature { key_index: 0 })
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn verify_signed_ordinary_event_authorizes_rotate_control_with_new_keys() -> Result<()> {
+        let (_signer, state) = genesis_state(0x11)?;
+        let new_signer = signing_key(0x55);
+        let new_control = KeySet::new(1, vec![control_key(&new_signer)])?;
+        let new_commitment = derive_next_key_commitment(&keyset(1, &[0x66])?)?;
+        let rotation = RotateControl::new(new_control, new_commitment);
+        let signed = ordinary_event(
+            &state,
+            IdentityAction::rotate_control(rotation),
+            &new_signer,
+        )?;
+
+        verify_signed_ordinary_event(&state, signed.as_ordinary().unwrap())?;
 
         Ok(())
     }
