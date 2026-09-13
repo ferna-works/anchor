@@ -20,6 +20,8 @@ devenv shell # Activate the development environment.
 devenv up    # Start a local 5-node CometBFT devnet.
 ```
 
+See the [demo](./crates/demo/README.md) for usage.
+
 ## → Status
 
 **Early-stage.**

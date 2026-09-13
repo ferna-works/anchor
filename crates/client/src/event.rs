@@ -1,10 +1,11 @@
 use anchor_codec::encode;
 use anchor_identity::{
-    AuthorizeDevice, DeviceId, EventId, EventSignatureTarget, IdentityAction, IdentityEvent,
-    IdentityId, IdentityState, Inception, InceptionSignatureTarget, KeySet, KeySignature,
-    PublicKey, RevokeDevice, RotateControl, Signature, SignedIdentityEvent, SignedInception,
-    SignedOrdinaryEvent, derive_event_signature_target, derive_identity_id,
-    derive_inception_signature_target, derive_next_key_commitment, derive_signed_event_id,
+    AuthorizeDevice, CommitCredential, CredentialHash, DeviceId, EventId, EventSignatureTarget,
+    IdentityAction, IdentityEvent, IdentityId, IdentityState, Inception, InceptionSignatureTarget,
+    KeySet, KeySignature, PublicKey, RevokeCredential, RevokeDevice, RotateControl, Signature,
+    SignedIdentityEvent, SignedInception, SignedOrdinaryEvent, derive_event_signature_target,
+    derive_identity_id, derive_inception_signature_target, derive_next_key_commitment,
+    derive_signed_event_id,
 };
 use ed25519_dalek::{Signer, SigningKey};
 
@@ -148,6 +149,34 @@ pub async fn prepare_revoke_device(
     prepare_event(state, id, action)
 }
 
+/// Fetches an identity's current state and builds a credential-commitment event ready for signing.
+pub async fn prepare_commit_credential(
+    client: &RpcClient,
+    id: IdentityId,
+    credential: CredentialHash,
+) -> Result<EventRequest, ClientError> {
+    let state = fetch_state_unverified(client, id)
+        .await?
+        .ok_or(ClientError::UnknownIdentity(id))?;
+    let action = IdentityAction::commit_credential(CommitCredential::new(credential));
+
+    prepare_event(state, id, action)
+}
+
+/// Fetches an identity's current state and builds a credential-revocation event ready for signing.
+pub async fn prepare_revoke_credential(
+    client: &RpcClient,
+    id: IdentityId,
+    credential: CredentialHash,
+) -> Result<EventRequest, ClientError> {
+    let state = fetch_state_unverified(client, id)
+        .await?
+        .ok_or(ClientError::UnknownIdentity(id))?;
+    let action = IdentityAction::revoke_credential(RevokeCredential::new(credential));
+
+    prepare_event(state, id, action)
+}
+
 /// Fetches an identity's current state and builds a deactivation event ready for signing.
 pub async fn prepare_deactivate(
     client: &RpcClient,
@@ -285,6 +314,36 @@ pub async fn revoke_device(
     device_id: DeviceId,
 ) -> Result<u64, ClientError> {
     let request = prepare_revoke_device(client, id, device_id).await?;
+    let signatures = sign_request(&request, signers)?;
+
+    finish_event(client, trusted, policy, request, signatures).await
+}
+
+/// Commits a credential, signing with `signers` and submitting it in one call.
+pub async fn commit_credential(
+    client: &RpcClient,
+    trusted: &TrustedChain,
+    policy: &VerificationPolicy,
+    id: IdentityId,
+    signers: &[SigningKey],
+    credential: CredentialHash,
+) -> Result<u64, ClientError> {
+    let request = prepare_commit_credential(client, id, credential).await?;
+    let signatures = sign_request(&request, signers)?;
+
+    finish_event(client, trusted, policy, request, signatures).await
+}
+
+/// Revokes a credential, signing with `signers` and submitting it in one call.
+pub async fn revoke_credential(
+    client: &RpcClient,
+    trusted: &TrustedChain,
+    policy: &VerificationPolicy,
+    id: IdentityId,
+    signers: &[SigningKey],
+    credential: CredentialHash,
+) -> Result<u64, ClientError> {
+    let request = prepare_revoke_credential(client, id, credential).await?;
     let signatures = sign_request(&request, signers)?;
 
     finish_event(client, trusted, policy, request, signatures).await

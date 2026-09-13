@@ -8,9 +8,10 @@ mod verification;
 
 pub use error::{ClientError, RpcError, TrustedError, VerificationError};
 pub use event::{
-    EventRequest, InceptionRequest, authorize_device, deactivate, finish_event, finish_inception,
-    inception, prepare_authorize_device, prepare_deactivate, prepare_inception,
-    prepare_revoke_device, prepare_rotate_control, revoke_device, rotate_control,
+    EventRequest, InceptionRequest, authorize_device, commit_credential, deactivate, finish_event,
+    finish_inception, inception, prepare_authorize_device, prepare_commit_credential,
+    prepare_deactivate, prepare_inception, prepare_revoke_credential, prepare_revoke_device,
+    prepare_rotate_control, revoke_credential, revoke_device, rotate_control,
 };
 pub use history::{HistoryResult, history};
 pub use query::{QueryResult, query};

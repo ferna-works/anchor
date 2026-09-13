@@ -1,0 +1,27 @@
+[package]
+name = "anchor-demo"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+publish = { workspace = true }
+
+[[bin]]
+name = "demo"
+path = "src/main.rs"
+
+[dependencies]
+anchor-client = { path = "../client" }
+anchor-codec = { path = "../codec" }
+anchor-did = { path = "../did" }
+anchor-identity = { path = "../identity" }
+clap = { version = "4.6.6", features = ["derive"] }
+ed25519-dalek = { version = "3.0.0", features = ["rand_core"] }
+owo-colors = { version = "4.4.0", features = ["supports-colors"] }
+rand = "0.10.2"
+thiserror = "2.0.20"
+tokio = { version = "1", features = ["macros", "rt"] }
+
+[dev-dependencies]
+assert_cmd = "2.2.2"
+predicates = "3.1.4"
+tempfile = "3.27.0"
