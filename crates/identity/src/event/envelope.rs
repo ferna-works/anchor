@@ -273,14 +273,14 @@ mod tests {
 
     use crate::{
         IdentityId, Inception, KeySet, RotateControl, SignedInception, derive_next_key_commitment,
-        testing::{keyset, signature},
+        testing::{dummy_keyset, signature},
     };
 
     use super::*;
 
     fn action() -> Result<IdentityAction> {
-        let control = keyset(1, &[0x11])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let control = dummy_keyset(1, &[0x11])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
 
         Ok(IdentityAction::rotate_control(RotateControl::new(
             control, commitment,
@@ -297,8 +297,8 @@ mod tests {
     }
 
     fn signed_inception() -> Result<SignedInception> {
-        let control = keyset(1, &[0x33])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x44])?)?;
+        let control = dummy_keyset(1, &[0x33])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x44])?)?;
         let inception = Inception::new(control, commitment);
 
         Ok(SignedInception::new(inception, vec![signature(0)])?)

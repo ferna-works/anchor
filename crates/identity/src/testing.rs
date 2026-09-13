@@ -13,7 +13,7 @@ pub(crate) fn key(byte: u8) -> PublicKey {
     PublicKey::from_ed25519_bytes([byte; 32])
 }
 
-pub(crate) fn keyset(threshold: u16, bytes: &[u8]) -> Result<KeySet> {
+pub(crate) fn dummy_keyset(threshold: u16, bytes: &[u8]) -> Result<KeySet> {
     let keys = bytes.iter().copied().map(key).collect();
 
     Ok(KeySet::new(threshold, keys)?)
@@ -40,7 +40,7 @@ pub(crate) fn sign(index: u16, key: &ed25519_dalek::SigningKey, message: &[u8]) 
 pub(crate) fn genesis_state(byte: u8) -> Result<(ed25519_dalek::SigningKey, IdentityState)> {
     let signer = signing_key(byte);
     let control = KeySet::new(1, vec![control_key(&signer)])?;
-    let commitment = derive_next_key_commitment(&keyset(1, &[byte.wrapping_add(1)])?)?;
+    let commitment = derive_next_key_commitment(&dummy_keyset(1, &[byte.wrapping_add(1)])?)?;
     let inception = Inception::new(control, commitment);
     let target = derive_inception_signature_target(&inception)?;
     let signed = SignedInception::new(inception, vec![sign(0, &signer, target.as_bytes())])?;

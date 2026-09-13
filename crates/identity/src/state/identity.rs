@@ -225,7 +225,7 @@ mod tests {
 
     use crate::{
         derive_next_key_commitment,
-        testing::{control_key, invalid_ed25519_public_key_bytes, keyset, signing_key},
+        testing::{control_key, dummy_keyset, invalid_ed25519_public_key_bytes, signing_key},
     };
 
     use super::*;
@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn identity_state_round_trips() -> Result<()> {
         let control = KeySet::new(1, vec![control_key(&signing_key(0x11))])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let (device_id, device_state) = device(0x33)?;
         let value = IdentityState::from_parts(
             IdentityId::from_bytes([1; 32]),
@@ -262,7 +262,7 @@ mod tests {
     fn from_parts_rejects_invalid_control_public_key() -> Result<()> {
         let invalid = invalid_ed25519_public_key_bytes()?;
         let control = KeySet::new(1, vec![PublicKey::from_ed25519_bytes(invalid)])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
 
         let result = IdentityState::from_parts(
             IdentityId::from_bytes([1; 32]),
@@ -285,7 +285,7 @@ mod tests {
     #[test]
     fn from_parts_rejects_invalid_device_public_key() -> Result<()> {
         let control = KeySet::new(1, vec![control_key(&signing_key(0x11))])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let invalid = invalid_ed25519_public_key_bytes()?;
         let device_state = DeviceState::new(PublicKey::from_ed25519_bytes(invalid));
         let device_id = DeviceId::from_bytes([9; 32]);
@@ -311,7 +311,7 @@ mod tests {
     #[test]
     fn from_parts_rejects_device_id_mismatch() -> Result<()> {
         let control = KeySet::new(1, vec![control_key(&signing_key(0x11))])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let (_, device_state) = device(0x33)?;
         let wrong_id = DeviceId::from_bytes([9; 32]);
 
@@ -333,7 +333,7 @@ mod tests {
     #[test]
     fn from_parts_rejects_duplicate_device_id() -> Result<()> {
         let control = KeySet::new(1, vec![control_key(&signing_key(0x11))])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let (device_id, device_state) = device(0x33)?;
 
         let result = IdentityState::from_parts(
@@ -354,7 +354,7 @@ mod tests {
     #[test]
     fn from_parts_rejects_too_many_devices() -> Result<()> {
         let control = KeySet::new(1, vec![control_key(&signing_key(0x11))])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let junk = DeviceState::new(PublicKey::from_ed25519_bytes([0; 32]));
         let devices = vec![(DeviceId::from_bytes([0; 32]), junk); IdentityState::MAX_DEVICES + 1];
 

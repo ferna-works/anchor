@@ -27,6 +27,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "anchor-state"
+version = "0.0.0"
+dependencies = [
+ "anchor-codec",
+ "anchor-identity",
+ "anchor-testing",
+ "anyhow",
+ "ed25519-dalek",
+ "thiserror",
+]
+
+[[package]]
+name = "anchor-testing"
+version = "0.0.0"
+dependencies = [
+ "anchor-identity",
+ "anyhow",
+ "ed25519-dalek",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"

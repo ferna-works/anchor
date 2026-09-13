@@ -1,0 +1,16 @@
+[package]
+name = "anchor-state"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+publish = { workspace = true }
+
+[dependencies]
+thiserror = "2.0.20"
+anchor-codec = { version = "0.0.0", path = "../codec" }
+anchor-identity = { version = "0.0.0", path = "../identity" }
+
+[dev-dependencies]
+anchor-testing = { version = "0.0.0", path = "../testing" }
+anyhow = "1.0.104"
+ed25519-dalek = "3.0.0"

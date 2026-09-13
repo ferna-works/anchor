@@ -83,7 +83,7 @@ pub fn apply_ordinary_event(
             state.devices().clone().into_iter().collect(),
             true,
         )?),
-        IdentityAction::RevokeCredential(_) | IdentityAction::CommitCredential(_) => {
+        IdentityAction::CommitCredential(_) | IdentityAction::RevokeCredential(_) => {
             Ok(IdentityState::from_parts(
                 id,
                 sequence,
@@ -105,7 +105,7 @@ mod tests {
         AuthorizeDevice, EventVerificationError, Inception, KeySet, RevokeDevice, RotateControl,
         Sequence, SignedInception, apply_inception, derive_device_id,
         derive_inception_signature_target,
-        testing::{control_key, genesis_state, keyset, ordinary_event, sign, signing_key},
+        testing::{control_key, dummy_keyset, genesis_state, ordinary_event, sign, signing_key},
     };
 
     use super::*;
@@ -114,7 +114,7 @@ mod tests {
     fn apply_ordinary_event_rejects_inception_event() -> Result<()> {
         let (signer, state) = genesis_state(0x11)?;
         let control = KeySet::new(1, vec![control_key(&signer)])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let inception = Inception::new(control, commitment);
         let target = derive_inception_signature_target(&inception)?;
         let signed = SignedInception::new(inception, vec![sign(0, &signer, target.as_bytes())])?;
@@ -256,7 +256,7 @@ mod tests {
         let state = apply_ordinary_event(&state, &authorize)?;
         assert!(!state.devices().is_empty());
 
-        let new_commitment = derive_next_key_commitment(&keyset(1, &[0x77])?)?;
+        let new_commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x77])?)?;
         let rotation = RotateControl::new(next_control.clone(), new_commitment);
         let event = ordinary_event(
             &state,
@@ -279,7 +279,7 @@ mod tests {
         let (_signer, state) = genesis_state(0x11)?;
         let unrelated_signer = signing_key(0x77);
         let unrelated_control = KeySet::new(1, vec![control_key(&unrelated_signer)])?;
-        let new_commitment = derive_next_key_commitment(&keyset(1, &[0x88])?)?;
+        let new_commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x88])?)?;
         let rotation = RotateControl::new(unrelated_control, new_commitment);
         let event = ordinary_event(
             &state,
@@ -313,12 +313,12 @@ mod tests {
     }
 
     #[test]
-    fn apply_ordinary_event_revoke_credential_advances_sequence_only() -> Result<()> {
+    fn apply_ordinary_event_commit_credential_advances_sequence_only() -> Result<()> {
         let (signer, state) = genesis_state(0x11)?;
-        let credential = crate::CredentialHash::from_bytes([0xaa; 32]);
+        let credential = crate::CredentialHash::from_bytes([0xbb; 32]);
         let event = ordinary_event(
             &state,
-            IdentityAction::revoke_credential(crate::RevokeCredential::new(credential)),
+            IdentityAction::commit_credential(crate::CommitCredential::new(credential)),
             &signer,
         )?;
 
@@ -334,12 +334,12 @@ mod tests {
     }
 
     #[test]
-    fn apply_ordinary_event_commit_credential_advances_sequence_only() -> Result<()> {
+    fn apply_ordinary_event_revoke_credential_advances_sequence_only() -> Result<()> {
         let (signer, state) = genesis_state(0x11)?;
-        let credential = crate::CredentialHash::from_bytes([0xbb; 32]);
+        let credential = crate::CredentialHash::from_bytes([0xaa; 32]);
         let event = ordinary_event(
             &state,
-            IdentityAction::commit_credential(crate::CommitCredential::new(credential)),
+            IdentityAction::revoke_credential(crate::RevokeCredential::new(credential)),
             &signer,
         )?;
 

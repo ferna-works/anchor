@@ -30,7 +30,7 @@ mod tests {
         InceptionVerificationError, KeySet, SignedIdentityEvent, SignedInception,
         SignedOrdinaryEvent, derive_identity_id, derive_inception_signature_target,
         derive_next_key_commitment,
-        testing::{control_key, keyset, sign, signing_key},
+        testing::{control_key, dummy_keyset, sign, signing_key},
     };
 
     use super::*;
@@ -38,7 +38,7 @@ mod tests {
     fn signed_inception(byte: u8) -> Result<(SignedInception, KeySet)> {
         let signer = signing_key(byte);
         let control = KeySet::new(1, vec![control_key(&signer)])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[byte.wrapping_add(1)])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[byte.wrapping_add(1)])?)?;
         let inception = Inception::new(control.clone(), commitment);
         let target = derive_inception_signature_target(&inception)?;
         let signed = SignedInception::new(inception, vec![sign(0, &signer, target.as_bytes())])?;
@@ -86,7 +86,7 @@ mod tests {
     fn apply_inception_propagates_verification_failures() -> Result<()> {
         let signer = signing_key(0x11);
         let control = KeySet::new(1, vec![control_key(&signer)])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
         let inception = Inception::new(control, commitment);
         let wrong_target = InceptionSignatureTarget::from_bytes([0; 32]);
         let signed =

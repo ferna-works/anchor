@@ -1,0 +1,11 @@
+[package]
+name = "anchor-testing"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+publish = { workspace = true }
+
+[dependencies]
+anchor-identity = { version = "0.0.0", path = "../identity" }
+anyhow = "1.0.104"
+ed25519-dalek = "3.0.0"

@@ -69,14 +69,14 @@ pub fn derive_signed_event_id(event: &SignedIdentityEvent) -> Result<EventId, En
 mod tests {
     use anyhow::Result;
 
-    use crate::testing::keyset;
+    use crate::testing::dummy_keyset;
 
     use super::*;
 
     #[test]
     fn next_key_commitment_binds_key_bytes() -> Result<()> {
-        let first = derive_next_key_commitment(&keyset(1, &[0x11])?)?;
-        let second = derive_next_key_commitment(&keyset(1, &[0x12])?)?;
+        let first = derive_next_key_commitment(&dummy_keyset(1, &[0x11])?)?;
+        let second = derive_next_key_commitment(&dummy_keyset(1, &[0x12])?)?;
 
         assert_ne!(first, second);
 
@@ -85,8 +85,8 @@ mod tests {
 
     #[test]
     fn next_key_commitment_binds_threshold() -> Result<()> {
-        let one_of_two = derive_next_key_commitment(&keyset(1, &[0x11, 0x22])?)?;
-        let two_of_two = derive_next_key_commitment(&keyset(2, &[0x11, 0x22])?)?;
+        let one_of_two = derive_next_key_commitment(&dummy_keyset(1, &[0x11, 0x22])?)?;
+        let two_of_two = derive_next_key_commitment(&dummy_keyset(2, &[0x11, 0x22])?)?;
 
         assert_ne!(one_of_two, two_of_two);
 
@@ -95,8 +95,8 @@ mod tests {
 
     #[test]
     fn next_key_commitment_binds_key_order() -> Result<()> {
-        let first = derive_next_key_commitment(&keyset(1, &[0x11, 0x22])?)?;
-        let reordered = derive_next_key_commitment(&keyset(1, &[0x22, 0x11])?)?;
+        let first = derive_next_key_commitment(&dummy_keyset(1, &[0x11, 0x22])?)?;
+        let reordered = derive_next_key_commitment(&dummy_keyset(1, &[0x22, 0x11])?)?;
 
         assert_ne!(first, reordered);
 
@@ -105,9 +105,9 @@ mod tests {
 
     #[test]
     fn identity_id_binds_next_key_commitment() -> Result<()> {
-        let control = keyset(1, &[0x11])?;
-        let first_commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
-        let second_commitment = derive_next_key_commitment(&keyset(1, &[0x23])?)?;
+        let control = dummy_keyset(1, &[0x11])?;
+        let first_commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
+        let second_commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x23])?)?;
         let first = Inception::new(control.clone(), first_commitment);
         let second = Inception::new(control, second_commitment);
 
@@ -118,9 +118,9 @@ mod tests {
 
     #[test]
     fn identity_id_binds_initial_control() -> Result<()> {
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
-        let first = Inception::new(keyset(1, &[0x11])?, commitment);
-        let second = Inception::new(keyset(1, &[0x12])?, commitment);
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
+        let first = Inception::new(dummy_keyset(1, &[0x11])?, commitment);
+        let second = Inception::new(dummy_keyset(1, &[0x12])?, commitment);
 
         assert_ne!(derive_identity_id(&first)?, derive_identity_id(&second)?);
 

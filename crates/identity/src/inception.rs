@@ -187,22 +187,22 @@ mod tests {
 
     use crate::{
         derive_next_key_commitment,
-        testing::{keyset, signature},
+        testing::{dummy_keyset, signature},
     };
 
     use super::*;
 
     fn inception() -> Result<Inception> {
-        let control = keyset(1, &[0x11])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let control = dummy_keyset(1, &[0x11])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
 
         Ok(Inception::new(control, commitment))
     }
 
     #[test]
     fn inception_decode_rejects_wrong_version() -> Result<()> {
-        let control = keyset(1, &[0x11])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
+        let control = dummy_keyset(1, &[0x11])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x22])?)?;
 
         let mut encoder = Encoder::new(Vec::new());
         encoder.array(3)?;
@@ -223,8 +223,8 @@ mod tests {
 
     #[test]
     fn signed_inception_rejects_insufficient_signatures() -> Result<()> {
-        let control = keyset(2, &[0x11, 0x22])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
+        let control = dummy_keyset(2, &[0x11, 0x22])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
 
         let result = SignedInception::new(inception, vec![signature(0)]);
@@ -259,8 +259,8 @@ mod tests {
 
     #[test]
     fn signed_inception_rejects_duplicate_key_index() -> Result<()> {
-        let control = keyset(1, &[0x11, 0x22])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
+        let control = dummy_keyset(1, &[0x11, 0x22])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
 
         let result = SignedInception::new(inception, vec![signature(0), signature(0)]);
@@ -277,8 +277,8 @@ mod tests {
 
     #[test]
     fn signed_inception_rejects_unordered_key_index() -> Result<()> {
-        let control = keyset(1, &[0x11, 0x22])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
+        let control = dummy_keyset(1, &[0x11, 0x22])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
 
         let result = SignedInception::new(inception, vec![signature(1), signature(0)]);
@@ -318,8 +318,8 @@ mod tests {
 
     #[test]
     fn signed_inception_round_trips() -> Result<()> {
-        let control = keyset(1, &[0x11, 0x22])?;
-        let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
+        let control = dummy_keyset(1, &[0x11, 0x22])?;
+        let commitment = derive_next_key_commitment(&dummy_keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
         let value = SignedInception::new(inception, vec![signature(0), signature(1)])?;
         let bytes = encode(&value)?;
