@@ -7,6 +7,7 @@ publish = { workspace = true }
 
 [dependencies]
 anchor-codec = { version = "0.0.0", path = "../codec" }
+blake3 = "1.8.7"
 minicbor = { version = "2.3.0", features = ["alloc"] }
 thiserror = "2.0.20"
 

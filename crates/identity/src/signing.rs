@@ -264,7 +264,7 @@ impl DecodeValue for KeySet {
             keys.push(PublicKey::decode_value(decoder)?);
         }
 
-        Self::new(threshold, keys).map_err(DecodeIdentityError::from)
+        Ok(Self::new(threshold, keys)?)
     }
 }
 

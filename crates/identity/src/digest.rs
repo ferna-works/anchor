@@ -17,3 +17,6 @@ pub type InceptionSignatureTarget = TaggedBytes<InceptionSignatureTargetTag, 32>
 
 pub enum EventSignatureTargetTag {}
 pub type EventSignatureTarget = TaggedBytes<EventSignatureTargetTag, 32>;
+
+pub enum CredentialHashTag {}
+pub type CredentialHash = TaggedBytes<CredentialHashTag, 32>;

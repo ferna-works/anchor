@@ -1,4 +1,134 @@
 {
+  "derived_ids": {
+    "device_ids": [
+      {
+        "expected": "6704893139b554631c84bd06ccbff6f7c0ab2345138f8673f309093b273f21ab",
+        "public_key": {
+          "algorithm": "ed25519",
+          "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        }
+      }
+    ],
+    "event_ids": [
+      {
+        "expected": "42a2fdf8ee01c41ee0d41bbd39e71bfb6b55c6439bcc087be2a7aebced244fdc",
+        "signed_identity_event": {
+          "event": {
+            "action": {
+              "control_keys": [
+                {
+                  "algorithm": "ed25519",
+                  "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+                }
+              ],
+              "control_threshold": 1,
+              "kind": "rotate_control",
+              "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+            },
+            "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+            "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+            "sequence": 1
+          },
+          "kind": "ordinary",
+          "signatures": [
+            {
+              "algorithm": "ed25519",
+              "key_index": 0,
+              "signature": "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+            }
+          ]
+        }
+      },
+      {
+        "expected": "07c746b508a1692fc7bac8050eaec7f38f497db06896aa8d5a66756464b14dcf",
+        "signed_identity_event": {
+          "configuration": {
+            "control_keys": [
+              {
+                "algorithm": "ed25519",
+                "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+              }
+            ],
+            "control_threshold": 1,
+            "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+          },
+          "kind": "inception",
+          "signatures": [
+            {
+              "algorithm": "ed25519",
+              "key_index": 0,
+              "signature": "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+            }
+          ]
+        }
+      }
+    ],
+    "event_signature_targets": [
+      {
+        "expected": "3a4fc91256991995548cde82c5c65f993d15042fb2ac26ec7bab131cc317f1a1",
+        "identity_event": {
+          "action": {
+            "control_keys": [
+              {
+                "algorithm": "ed25519",
+                "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+              }
+            ],
+            "control_threshold": 1,
+            "kind": "rotate_control",
+            "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+          },
+          "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+          "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+          "sequence": 1
+        }
+      }
+    ],
+    "identity_ids": [
+      {
+        "expected": "b500ed8843e3712cfbc897eb411e822cc5d4355959d51a4606a460a54ce2f135",
+        "inception_configuration": {
+          "control_keys": [
+            {
+              "algorithm": "ed25519",
+              "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            }
+          ],
+          "control_threshold": 1,
+          "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+        }
+      }
+    ],
+    "inception_signature_targets": [
+      {
+        "expected": "aedc7eaa9bd4ec37d0d7197d573b5f900dc34b142e433dc2d4a4cea3a44384e8",
+        "inception_configuration": {
+          "control_keys": [
+            {
+              "algorithm": "ed25519",
+              "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            }
+          ],
+          "control_threshold": 1,
+          "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+        }
+      }
+    ],
+    "next_key_commitments": [
+      {
+        "expected": "68cada69ce9b503af0be536bd856e2cb7ce2a7d6600b99a4a39c682cf145e020",
+        "key_set": {
+          "keys": [
+            {
+              "algorithm": "ed25519",
+              "key": "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f"
+            }
+          ],
+          "threshold": 1
+        }
+      }
+    ]
+  },
   "device_ids": [
     {
       "bytes": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
@@ -29,6 +159,77 @@
       "canonical": "58203333333333333333333333333333333333333333333333333333333333333333"
     }
   ],
+  "identity_events": [
+    {
+      "action": {
+        "control_keys": [
+          {
+            "algorithm": "ed25519",
+            "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          }
+        ],
+        "control_threshold": 1,
+        "kind": "rotate_control",
+        "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+      },
+      "canonical": "85005820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f015820707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f82008282018182005820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f58205a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6",
+      "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+      "sequence": 1
+    },
+    {
+      "action": {
+        "device_key": {
+          "algorithm": "ed25519",
+          "key": "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f"
+        },
+        "kind": "authorize_device"
+      },
+      "canonical": "85005820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f015820707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f82018182005820101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f",
+      "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+      "sequence": 1
+    },
+    {
+      "action": {
+        "device_id": "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+        "kind": "revoke_device"
+      },
+      "canonical": "85005820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f015820707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f8202815820808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+      "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+      "sequence": 1
+    },
+    {
+      "action": {
+        "kind": "deactivate"
+      },
+      "canonical": "85005820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f015820707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f820380",
+      "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+      "sequence": 1
+    },
+    {
+      "action": {
+        "credential_hash": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf",
+        "kind": "revoke_credential"
+      },
+      "canonical": "85005820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f015820707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f8205815820c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf",
+      "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+      "sequence": 1
+    },
+    {
+      "action": {
+        "credential_hash": "e0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff",
+        "kind": "commit_credential"
+      },
+      "canonical": "85005820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f015820707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f8204815820e0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff",
+      "identity": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "previous": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
+      "sequence": 1
+    }
+  ],
   "identity_ids": [
     {
       "bytes": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
@@ -37,6 +238,19 @@
     {
       "bytes": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "canonical": "5820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "inception_configurations": [
+    {
+      "canonical": "830082018182005820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f58205a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6",
+      "control_keys": [
+        {
+          "algorithm": "ed25519",
+          "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        }
+      ],
+      "control_threshold": 1,
+      "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
     }
   ],
   "inception_signature_targets": [
@@ -121,6 +335,28 @@
       "algorithm": "p256",
       "canonical": "82015840aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "signed_inceptions": [
+    {
+      "canonical": "82830082018182005820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f58205a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a68182008200584001010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "configuration": {
+        "control_keys": [
+          {
+            "algorithm": "ed25519",
+            "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          }
+        ],
+        "control_threshold": 1,
+        "next_key_commitment": "5a1aeb8053e2d2f25cb9860d7c729a49223c4a9456d60f802efd1d90081530a6"
+      },
+      "signatures": [
+        {
+          "algorithm": "ed25519",
+          "key_index": 0,
+          "signature": "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+        }
+      ]
     }
   ]
 }
