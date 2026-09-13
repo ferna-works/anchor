@@ -20,6 +20,7 @@ use crate::{
 };
 
 /// A ledger store backed by a redb database.
+#[derive(Debug)]
 pub struct LedgerStore {
     database: Database,
     write_lock: Mutex<()>,

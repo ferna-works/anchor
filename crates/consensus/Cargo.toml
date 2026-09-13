@@ -1,16 +1,23 @@
 [package]
-name = "anchor-state"
+name = "anchor-consensus"
 edition = { workspace = true }
 rust-version = { workspace = true }
 version = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-thiserror = "2.0.20"
 anchor-codec = { path = "../codec" }
+anchor-commitment = { path = "../commitment" }
 anchor-identity = { path = "../identity" }
+anchor-state = { path = "../state" }
+anchor-storage = { path = "../storage" }
+tendermint-abci = "0.40.4"
+tendermint-proto = "0.40.4"
+tracing = "0.1.44"
 
 [dev-dependencies]
+anchor-proof = { path = "../proof" }
 anchor-testing = { path = "../testing" }
 anyhow = "1.0.104"
-ed25519-dalek = "3.0.0"
+jmt = "0.12.0"
+tempfile = "3.27.0"

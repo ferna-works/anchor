@@ -30,6 +30,14 @@ impl<Tag, const N: usize> TaggedBytes<Tag, N> {
     pub const fn to_bytes(self) -> [u8; N] {
         self.bytes.to_bytes()
     }
+
+    /// Wraps a byte slice under this type's tag, returning `None` if its length isn't exactly `N`.
+    pub fn from_slice(slice: &[u8]) -> Option<Self> {
+        Some(Self {
+            bytes: FixedBytesArray::from_slice(slice)?,
+            tag: PhantomData,
+        })
+    }
 }
 
 impl<Tag, const N: usize> Clone for TaggedBytes<Tag, N> {
