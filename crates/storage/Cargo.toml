@@ -1,0 +1,22 @@
+[package]
+name = "anchor-storage"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+publish = { workspace = true }
+
+[dependencies]
+anyhow = "1.0.104"
+borsh = "1.8.1"
+anchor-codec = { path = "../codec" }
+anchor-commitment = { path = "../commitment" }
+anchor-identity = { path = "../identity" }
+anchor-proof = { path = "../proof" }
+anchor-state = { path = "../state" }
+jmt = { version = "0.12.0", default-features = false, features = ["std"] }
+redb = "4.2.0"
+thiserror = "2.0.20"
+
+[dev-dependencies]
+anchor-testing = { path = "../testing" }
+tempfile = "3.27.0"
