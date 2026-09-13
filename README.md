@@ -17,6 +17,7 @@ Get that installed, and then:
 
 ```sh
 devenv shell # Activate the development environment.
+devenv up    # Start a local 5-node CometBFT devnet.
 ```
 
 ## → Status

@@ -1,5 +1,7 @@
 set shell := ["bash", "-c"]
 
+mod scripts "just/scripts.just"
+
 check:
     cargo check --workspace
     cargo fmt --all -- --check
