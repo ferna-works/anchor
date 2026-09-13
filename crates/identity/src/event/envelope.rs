@@ -271,22 +271,12 @@ mod tests {
     use anyhow::Result;
     use minicbor::Encoder;
 
+    use crate::testing::{keyset, signature};
     use crate::{
-        IdentityId, Inception, KeySet, KeySignature, PublicKey, RotateControl, Signature,
-        SignedInception, derive_next_key_commitment,
+        IdentityId, Inception, KeySet, RotateControl, SignedInception, derive_next_key_commitment,
     };
 
     use super::*;
-
-    fn key(byte: u8) -> PublicKey {
-        PublicKey::from_ed25519_bytes([byte; 32])
-    }
-
-    fn keyset(threshold: u16, bytes: &[u8]) -> Result<KeySet> {
-        let keys = bytes.iter().copied().map(key).collect();
-
-        Ok(KeySet::new(threshold, keys)?)
-    }
 
     fn action() -> Result<IdentityAction> {
         let control = keyset(1, &[0x11])?;
@@ -306,16 +296,12 @@ mod tests {
         ))
     }
 
-    fn dummy_signature(index: u16) -> KeySignature {
-        KeySignature::new(index, Signature::from_ed25519_bytes([index as u8; 64]))
-    }
-
     fn signed_inception() -> Result<SignedInception> {
         let control = keyset(1, &[0x33])?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x44])?)?;
         let inception = Inception::new(control, commitment);
 
-        Ok(SignedInception::new(inception, vec![dummy_signature(0)])?)
+        Ok(SignedInception::new(inception, vec![signature(0)])?)
     }
 
     #[test]
@@ -352,7 +338,7 @@ mod tests {
 
     #[test]
     fn signed_ordinary_event_rejects_too_many_signatures() -> Result<()> {
-        let signatures = vec![dummy_signature(0); KeySet::MAX_KEYS + 1];
+        let signatures = vec![signature(0); KeySet::MAX_KEYS + 1];
 
         let result = SignedOrdinaryEvent::new(identity_event()?, signatures);
 
@@ -369,10 +355,7 @@ mod tests {
 
     #[test]
     fn signed_ordinary_event_rejects_duplicate_key_index() -> Result<()> {
-        let result = SignedOrdinaryEvent::new(
-            identity_event()?,
-            vec![dummy_signature(0), dummy_signature(0)],
-        );
+        let result = SignedOrdinaryEvent::new(identity_event()?, vec![signature(0), signature(0)]);
 
         assert!(matches!(
             result,
@@ -384,10 +367,7 @@ mod tests {
 
     #[test]
     fn signed_ordinary_event_rejects_unordered_key_index() -> Result<()> {
-        let result = SignedOrdinaryEvent::new(
-            identity_event()?,
-            vec![dummy_signature(1), dummy_signature(0)],
-        );
+        let result = SignedOrdinaryEvent::new(identity_event()?, vec![signature(1), signature(0)]);
 
         assert!(matches!(
             result,
@@ -402,10 +382,7 @@ mod tests {
 
     #[test]
     fn signed_ordinary_event_round_trips() -> Result<()> {
-        let value = SignedOrdinaryEvent::new(
-            identity_event()?,
-            vec![dummy_signature(0), dummy_signature(1)],
-        )?;
+        let value = SignedOrdinaryEvent::new(identity_event()?, vec![signature(0), signature(1)])?;
         let bytes = encode(&value)?;
 
         assert_eq!(decode::<SignedOrdinaryEvent>(&bytes)?, value);
@@ -419,8 +396,8 @@ mod tests {
         encoder.array(2)?;
         identity_event()?.encode_value(&mut encoder)?;
         encoder.array(2)?;
-        dummy_signature(0).encode_value(&mut encoder)?;
-        dummy_signature(0).encode_value(&mut encoder)?;
+        signature(0).encode_value(&mut encoder)?;
+        signature(0).encode_value(&mut encoder)?;
 
         let bytes = encoder.into_writer();
 
@@ -448,7 +425,7 @@ mod tests {
 
     #[test]
     fn signed_identity_event_round_trips_ordinary() -> Result<()> {
-        let signed = SignedOrdinaryEvent::new(identity_event()?, vec![dummy_signature(0)])?;
+        let signed = SignedOrdinaryEvent::new(identity_event()?, vec![signature(0)])?;
         let value = SignedIdentityEvent::ordinary(signed);
         let bytes = encode(&value)?;
 

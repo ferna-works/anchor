@@ -296,6 +296,8 @@ mod tests {
     use anchor_codec::{decode, encode};
     use anyhow::Result;
 
+    use crate::testing::key;
+
     use super::*;
 
     #[test]
@@ -327,10 +329,6 @@ mod tests {
         assert_eq!(decode::<PublicKey>(&bytes)?, value);
 
         Ok(())
-    }
-
-    fn key(byte: u8) -> PublicKey {
-        PublicKey::from_ed25519_bytes([byte; 32])
     }
 
     #[test]

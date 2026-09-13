@@ -69,19 +69,9 @@ pub fn derive_signed_event_id(event: &SignedIdentityEvent) -> Result<EventId, En
 mod tests {
     use anyhow::Result;
 
-    use crate::PublicKey;
+    use crate::testing::keyset;
 
     use super::*;
-
-    fn key(byte: u8) -> PublicKey {
-        PublicKey::from_ed25519_bytes([byte; 32])
-    }
-
-    fn keyset(threshold: u16, bytes: &[u8]) -> Result<KeySet> {
-        let keys = bytes.iter().copied().map(key).collect();
-
-        Ok(KeySet::new(threshold, keys)?)
-    }
 
     #[test]
     fn next_key_commitment_binds_key_bytes() -> Result<()> {
