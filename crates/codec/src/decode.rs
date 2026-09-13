@@ -107,24 +107,11 @@ mod tests {
     use anyhow::Result;
     use minicbor::Encoder;
 
-    use crate::{EncodeError, FixedByteString, encode_array};
+    use crate::{EncodeError, FixedBytesArray, encode_array};
 
     use super::*;
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    struct Id([u8; 4]);
-
-    impl FixedByteString for Id {
-        const LENGTH: usize = 4;
-
-        fn from_slice(bytes: &[u8]) -> Option<Self> {
-            Some(Self(bytes.try_into().ok()?))
-        }
-
-        fn as_slice(&self) -> &[u8] {
-            &self.0
-        }
-    }
+    type Id = FixedBytesArray<4>;
 
     #[derive(Debug, Clone, PartialEq, Eq)]
     struct Ids(Vec<Id>);
@@ -145,7 +132,10 @@ mod tests {
 
     #[test]
     fn array_round_trips() -> Result<()> {
-        let value = Ids(vec![Id([1, 2, 3, 4]), Id([5, 6, 7, 8])]);
+        let value = Ids(vec![
+            Id::from_bytes([1, 2, 3, 4]),
+            Id::from_bytes([5, 6, 7, 8]),
+        ]);
         let bytes = encode(&value)?;
 
         assert_eq!(decode::<Ids>(&bytes)?, value);
@@ -155,7 +145,7 @@ mod tests {
 
     #[test]
     fn list_round_trips() -> Result<()> {
-        let value = vec![Id([1, 2, 3, 4]), Id([5, 6, 7, 8])];
+        let value = vec![Id::from_bytes([1, 2, 3, 4]), Id::from_bytes([5, 6, 7, 8])];
         let bytes = encode_list(&value)?;
 
         assert_eq!(decode_list::<Id>(&bytes, 8)?, value);

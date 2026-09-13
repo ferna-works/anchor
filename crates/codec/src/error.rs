@@ -26,8 +26,19 @@ pub enum DecodeError {
     UnexpectedArrayLength { expected: u64, actual: u64 },
     #[error("collection length {actual} exceeds maximum {maximum}")]
     CollectionTooLarge { maximum: usize, actual: u64 },
+    #[error("unsupported tag {actual}")]
+    UnsupportedTag { actual: u16 },
     #[error("trailing bytes")]
     TrailingBytes,
     #[error("noncanonical encoding")]
     Noncanonical,
+}
+
+#[non_exhaustive]
+#[derive(Debug, Error)]
+pub enum HexError {
+    #[error("hex string has odd length")]
+    OddLength,
+    #[error("invalid hex digit")]
+    InvalidDigit,
 }

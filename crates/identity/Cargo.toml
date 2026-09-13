@@ -1,0 +1,16 @@
+[package]
+name = "anchor-identity"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+publish = { workspace = true }
+
+[dependencies]
+anchor-codec = { version = "0.0.0", path = "../codec" }
+minicbor = { version = "2.3.0", features = ["alloc"] }
+thiserror = "2.0.20"
+
+[dev-dependencies]
+anyhow = "1.0.104"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"

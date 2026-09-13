@@ -1,0 +1,126 @@
+{
+  "device_ids": [
+    {
+      "bytes": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      "canonical": "5820deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+    },
+    {
+      "bytes": "0100000000000000000000000000000000000000000000000000000000000000",
+      "canonical": "58200100000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "event_ids": [
+    {
+      "bytes": "3e3d3c3b3a393837363534333231302f2e2d2c2b2a292827262524232221201f",
+      "canonical": "58203e3d3c3b3a393837363534333231302f2e2d2c2b2a292827262524232221201f"
+    },
+    {
+      "bytes": "0000000000000000000000000000000000000000000000000000000000000000",
+      "canonical": "58200000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "event_signature_targets": [
+    {
+      "bytes": "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+      "canonical": "5820808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"
+    },
+    {
+      "bytes": "3333333333333333333333333333333333333333333333333333333333333333",
+      "canonical": "58203333333333333333333333333333333333333333333333333333333333333333"
+    }
+  ],
+  "identity_ids": [
+    {
+      "bytes": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "canonical": "5820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    },
+    {
+      "bytes": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "canonical": "5820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "inception_signature_targets": [
+    {
+      "bytes": "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "canonical": "5820606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f"
+    },
+    {
+      "bytes": "2222222222222222222222222222222222222222222222222222222222222222",
+      "canonical": "58202222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "key_sets": [
+    {
+      "canonical": "82018182005820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "keys": [
+        {
+          "algorithm": "ed25519",
+          "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        }
+      ],
+      "threshold": 1
+    },
+    {
+      "canonical": "82028282005820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f8201582102000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "keys": [
+        {
+          "algorithm": "ed25519",
+          "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        {
+          "algorithm": "p256",
+          "key": "02000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        }
+      ],
+      "threshold": 2
+    }
+  ],
+  "key_signatures": [
+    {
+      "algorithm": "ed25519",
+      "canonical": "820182005840000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+      "key_index": 1,
+      "signature": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+    },
+    {
+      "algorithm": "p256",
+      "canonical": "820782015840aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "key_index": 7,
+      "signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "next_key_commitments": [
+    {
+      "bytes": "404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f",
+      "canonical": "5820404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f"
+    },
+    {
+      "bytes": "7777777777777777777777777777777777777777777777777777777777777777",
+      "canonical": "58207777777777777777777777777777777777777777777777777777777777777777"
+    }
+  ],
+  "public_keys": [
+    {
+      "algorithm": "ed25519",
+      "canonical": "82005820000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    },
+    {
+      "algorithm": "p256",
+      "canonical": "8201582102000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "key": "02000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    }
+  ],
+  "signatures": [
+    {
+      "algorithm": "ed25519",
+      "canonical": "82005840000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+      "signature": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+    },
+    {
+      "algorithm": "p256",
+      "canonical": "82015840aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

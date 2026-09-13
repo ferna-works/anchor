@@ -2,31 +2,47 @@ use minicbor::{Decoder, Encoder};
 
 use crate::{DecodeError, DecodeValue, EncodeError, EncodeValue};
 
-pub trait FixedByteString: Sized {
-    const LENGTH: usize;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FixedBytesArray<const N: usize>([u8; N]);
 
-    fn from_slice(bytes: &[u8]) -> Option<Self>;
-    fn as_slice(&self) -> &[u8];
+impl<const N: usize> FixedBytesArray<N> {
+    /// Wraps a fixed-size byte array.
+    pub const fn from_bytes(bytes: [u8; N]) -> Self {
+        Self(bytes)
+    }
+
+    /// Returns the underlying bytes by reference.
+    pub const fn as_bytes(&self) -> &[u8; N] {
+        &self.0
+    }
+
+    /// Returns the underlying bytes, consuming `self`.
+    pub const fn to_bytes(self) -> [u8; N] {
+        self.0
+    }
 }
 
-impl<T: FixedByteString> EncodeValue for T {
+impl<const N: usize> EncodeValue for FixedBytesArray<N> {
     fn encode_value(&self, encoder: &mut Encoder<Vec<u8>>) -> Result<(), EncodeError> {
-        encoder.bytes(self.as_slice())?;
+        encoder.bytes(&self.0)?;
 
         Ok(())
     }
 }
 
-impl<T: FixedByteString> DecodeValue for T {
+impl<const N: usize> DecodeValue for FixedBytesArray<N> {
     type Error = DecodeError;
 
     fn decode_value(decoder: &mut Decoder<'_>) -> Result<Self, DecodeError> {
         let decoded = decoder.bytes()?;
+        let bytes: [u8; N] = decoded
+            .try_into()
+            .map_err(|_| DecodeError::UnexpectedByteLength {
+                expected: N,
+                actual: decoded.len(),
+            })?;
 
-        T::from_slice(decoded).ok_or(DecodeError::UnexpectedByteLength {
-            expected: T::LENGTH,
-            actual: decoded.len(),
-        })
+        Ok(Self(bytes))
     }
 }
 
@@ -39,20 +55,7 @@ mod tests {
 
     use super::*;
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    struct Id([u8; 4]);
-
-    impl FixedByteString for Id {
-        const LENGTH: usize = 4;
-
-        fn from_slice(bytes: &[u8]) -> Option<Self> {
-            Some(Self(bytes.try_into().ok()?))
-        }
-
-        fn as_slice(&self) -> &[u8] {
-            &self.0
-        }
-    }
+    type Id = FixedBytesArray<4>;
 
     fn encode_bytes(bytes: &[u8]) -> Result<Vec<u8>> {
         let mut encoder = Encoder::new(Vec::new());
@@ -63,8 +66,8 @@ mod tests {
     }
 
     #[test]
-    fn fixed_byte_string_round_trips() -> Result<()> {
-        let value = Id([1, 2, 3, 4]);
+    fn fixed_byte_array_round_trips() -> Result<()> {
+        let value = Id::from_bytes([1, 2, 3, 4]);
         let bytes = encode(&value)?;
 
         assert_eq!(decode::<Id>(&bytes)?, value);
@@ -73,7 +76,7 @@ mod tests {
     }
 
     #[test]
-    fn fixed_byte_string_rejects_wrong_length() -> Result<()> {
+    fn fixed_byte_array_rejects_wrong_length() -> Result<()> {
         let bytes = encode_bytes(&[1, 2, 3])?;
 
         let result = decode::<Id>(&bytes);
@@ -90,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn fixed_byte_string_rejects_trailing_bytes() -> Result<()> {
+    fn fixed_byte_array_rejects_trailing_bytes() -> Result<()> {
         let mut bytes = encode_bytes(&[1, 2, 3, 4])?;
         bytes.push(0xff);
 
@@ -102,7 +105,7 @@ mod tests {
     }
 
     #[test]
-    fn fixed_byte_string_rejects_noncanonical_length_prefix() {
+    fn fixed_byte_array_rejects_noncanonical_length_prefix() {
         let mut bytes = vec![0x58, 0x04];
         bytes.extend_from_slice(&[1, 2, 3, 4]);
 
