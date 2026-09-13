@@ -1,6 +1,8 @@
 use anchor_codec::{DecodeError, EncodeError};
 use thiserror::Error;
 
+use crate::DeviceId;
+
 #[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum DecodeIdentityError {
@@ -14,6 +16,8 @@ pub enum DecodeIdentityError {
     SignedInception(#[from] SignedInceptionError),
     #[error(transparent)]
     KeySignatureList(#[from] KeySignatureListError),
+    #[error(transparent)]
+    IdentityState(#[from] IdentityStateError),
     #[error("unsupported protocol version {actual}")]
     UnsupportedVersion { actual: u16 },
 }
@@ -73,4 +77,34 @@ pub enum InceptionVerificationError {
     InvalidPublicKey { key_index: u16 },
     #[error("invalid signature for control key index {key_index}")]
     InvalidSignature { key_index: u16 },
+}
+
+#[non_exhaustive]
+#[derive(Debug, Error)]
+pub enum IdentityStateError {
+    #[error("control key at index {index} is not a valid public key")]
+    InvalidControlPublicKey { index: usize },
+    #[error("device {id:?} does not contain a valid public key")]
+    InvalidDevicePublicKey { id: DeviceId },
+    #[error("could not derive device ID: {0}")]
+    DeviceId(#[source] EncodeError),
+    #[error("stored device ID does not match its public key")]
+    DeviceIdMismatch,
+    #[error("duplicate device ID")]
+    DuplicateDeviceId,
+    #[error("too many devices: maximum is {maximum}")]
+    TooManyDevices { maximum: usize },
+}
+
+#[non_exhaustive]
+#[derive(Debug, Error)]
+pub enum ApplyError {
+    #[error(transparent)]
+    EventId(#[from] EncodeError),
+    #[error(transparent)]
+    State(#[from] IdentityStateError),
+    #[error(transparent)]
+    InceptionVerification(#[from] InceptionVerificationError),
+    #[error("expected an inception event")]
+    ExpectedInception,
 }

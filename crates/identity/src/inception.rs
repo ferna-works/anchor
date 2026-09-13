@@ -185,8 +185,10 @@ mod tests {
     use anyhow::Result;
     use minicbor::Encoder;
 
-    use crate::derive_next_key_commitment;
-    use crate::testing::{keyset, signature};
+    use crate::{
+        derive_next_key_commitment,
+        testing::{keyset, signature},
+    };
 
     use super::*;
 

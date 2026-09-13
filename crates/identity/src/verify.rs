@@ -85,34 +85,13 @@ mod tests {
     use anyhow::Result;
     use ed25519_dalek::Signer as _;
 
-    use crate::testing::keyset;
     use crate::{
         Inception, KeySignature, PublicKey, Signature as IdentitySignature, SignedInception,
         derive_identity_id, derive_inception_signature_target, derive_next_key_commitment,
+        testing::{control_key, invalid_ed25519_public_key_bytes, keyset, sign, signing_key},
     };
 
     use super::*;
-
-    fn ed25519_signing_key(byte: u8) -> ed25519_dalek::SigningKey {
-        ed25519_dalek::SigningKey::from_bytes(&[byte; 32])
-    }
-
-    fn ed25519_control_key(key: &ed25519_dalek::SigningKey) -> PublicKey {
-        PublicKey::from_ed25519_bytes(key.verifying_key().to_bytes())
-    }
-
-    fn ed25519_sign(
-        index: u16,
-        key: &ed25519_dalek::SigningKey,
-        target: &crate::InceptionSignatureTarget,
-    ) -> KeySignature {
-        let signature = key.sign(target.as_bytes());
-
-        KeySignature::new(
-            index,
-            IdentitySignature::from_ed25519_bytes(signature.to_bytes()),
-        )
-    }
 
     fn p256_signing_key(byte: u8) -> p256::ecdsa::SigningKey {
         p256::ecdsa::SigningKey::from_slice(&[byte; 32]).expect("valid P-256 scalar")
@@ -161,12 +140,12 @@ mod tests {
 
     #[test]
     fn verifies_one_of_one_signed_inception() -> Result<()> {
-        let signer = ed25519_signing_key(0x11);
-        let control = KeySet::new(1, vec![ed25519_control_key(&signer)])?;
+        let signer = signing_key(0x11);
+        let control = KeySet::new(1, vec![control_key(&signer)])?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
         let inception = Inception::new(control, commitment);
         let target = derive_inception_signature_target(&inception)?;
-        let signed = SignedInception::new(inception, vec![ed25519_sign(0, &signer, &target)])?;
+        let signed = SignedInception::new(inception, vec![sign(0, &signer, target.as_bytes())])?;
 
         let identity = verify_signed_inception(&signed)?;
 
@@ -177,15 +156,15 @@ mod tests {
 
     #[test]
     fn verifies_two_of_three_signed_inception() -> Result<()> {
-        let first = ed25519_signing_key(0x11);
-        let second = ed25519_signing_key(0x22);
-        let third = ed25519_signing_key(0x33);
+        let first = signing_key(0x11);
+        let second = signing_key(0x22);
+        let third = signing_key(0x33);
         let control = KeySet::new(
             2,
             vec![
-                ed25519_control_key(&first),
-                ed25519_control_key(&second),
-                ed25519_control_key(&third),
+                control_key(&first),
+                control_key(&second),
+                control_key(&third),
             ],
         )?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x44])?)?;
@@ -194,8 +173,8 @@ mod tests {
         let signed = SignedInception::new(
             inception,
             vec![
-                ed25519_sign(0, &first, &target),
-                ed25519_sign(2, &third, &target),
+                sign(0, &first, target.as_bytes()),
+                sign(2, &third, target.as_bytes()),
             ],
         )?;
 
@@ -206,16 +185,13 @@ mod tests {
 
     #[test]
     fn verification_rejects_signature_for_wrong_index() -> Result<()> {
-        let first = ed25519_signing_key(0x11);
-        let second = ed25519_signing_key(0x22);
-        let control = KeySet::new(
-            1,
-            vec![ed25519_control_key(&first), ed25519_control_key(&second)],
-        )?;
+        let first = signing_key(0x11);
+        let second = signing_key(0x22);
+        let control = KeySet::new(1, vec![control_key(&first), control_key(&second)])?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
         let target = derive_inception_signature_target(&inception)?;
-        let signed = SignedInception::new(inception, vec![ed25519_sign(1, &first, &target)])?;
+        let signed = SignedInception::new(inception, vec![sign(1, &first, target.as_bytes())])?;
 
         let result = verify_signed_inception(&signed);
 
@@ -229,8 +205,8 @@ mod tests {
 
     #[test]
     fn verification_rejects_tampered_inception() -> Result<()> {
-        let signer = ed25519_signing_key(0x11);
-        let control = KeySet::new(1, vec![ed25519_control_key(&signer)])?;
+        let signer = signing_key(0x11);
+        let control = KeySet::new(1, vec![control_key(&signer)])?;
         let original = Inception::new(
             control.clone(),
             derive_next_key_commitment(&keyset(1, &[0x22])?)?,
@@ -238,7 +214,7 @@ mod tests {
         let original_target = derive_inception_signature_target(&original)?;
         let tampered = Inception::new(control, derive_next_key_commitment(&keyset(1, &[0x23])?)?);
         let signed =
-            SignedInception::new(tampered, vec![ed25519_sign(0, &signer, &original_target)])?;
+            SignedInception::new(tampered, vec![sign(0, &signer, original_target.as_bytes())])?;
 
         let result = verify_signed_inception(&signed);
 
@@ -252,20 +228,17 @@ mod tests {
 
     #[test]
     fn verification_checks_every_signature_not_just_threshold_many() -> Result<()> {
-        let first = ed25519_signing_key(0x11);
-        let second = ed25519_signing_key(0x22);
-        let control = KeySet::new(
-            1,
-            vec![ed25519_control_key(&first), ed25519_control_key(&second)],
-        )?;
+        let first = signing_key(0x11);
+        let second = signing_key(0x22);
+        let control = KeySet::new(1, vec![control_key(&first), control_key(&second)])?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
         let target = derive_inception_signature_target(&inception)?;
         let signed = SignedInception::new(
             inception,
             vec![
-                ed25519_sign(0, &first, &target),
-                ed25519_sign(1, &first, &target),
+                sign(0, &first, target.as_bytes()),
+                sign(1, &first, target.as_bytes()),
             ],
         )?;
 
@@ -281,15 +254,7 @@ mod tests {
 
     #[test]
     fn verification_rejects_invalid_public_key_bytes() -> Result<()> {
-        let invalid_key = (0_u32..)
-            .find_map(|candidate| {
-                let mut bytes = [0_u8; 32];
-                bytes[..4].copy_from_slice(&candidate.to_be_bytes());
-                ed25519_dalek::VerifyingKey::from_bytes(&bytes)
-                    .is_err()
-                    .then_some(bytes)
-            })
-            .ok_or_else(|| anyhow::anyhow!("could not find invalid Ed25519 key bytes"))?;
+        let invalid_key = invalid_ed25519_public_key_bytes()?;
         let control = KeySet::new(1, vec![PublicKey::from_ed25519_bytes(invalid_key)])?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x22])?)?;
         let inception = Inception::new(control, commitment);
@@ -330,14 +295,11 @@ mod tests {
 
     #[test]
     fn verifies_signed_inception_with_mixed_ed25519_and_p256_control_keys() -> Result<()> {
-        let ed25519_signer = ed25519_signing_key(0x11);
+        let ed25519_signer = signing_key(0x11);
         let p256_signer = p256_signing_key(0x22);
         let control = KeySet::new(
             2,
-            vec![
-                ed25519_control_key(&ed25519_signer),
-                p256_control_key(&p256_signer),
-            ],
+            vec![control_key(&ed25519_signer), p256_control_key(&p256_signer)],
         )?;
         let commitment = derive_next_key_commitment(&keyset(1, &[0x33])?)?;
         let inception = Inception::new(control, commitment);
@@ -345,7 +307,7 @@ mod tests {
         let signed = SignedInception::new(
             inception,
             vec![
-                ed25519_sign(0, &ed25519_signer, &target),
+                sign(0, &ed25519_signer, target.as_bytes()),
                 p256_sign(1, &p256_signer, target.as_bytes()),
             ],
         )?;

@@ -4,9 +4,11 @@ mod error;
 mod event;
 mod inception;
 mod signing;
+mod state;
+mod verify;
+
 #[cfg(test)]
 mod testing;
-mod verify;
 
 pub use derive::{
     derive_device_id, derive_event_signature_target, derive_identity_id,
@@ -18,8 +20,8 @@ pub use digest::{
 };
 
 pub use error::{
-    DecodeIdentityError, InceptionVerificationError, KeySetError, KeySignatureListError,
-    PublicKeyError, SignedInceptionError,
+    ApplyError, DecodeIdentityError, IdentityStateError, InceptionVerificationError, KeySetError,
+    KeySignatureListError, PublicKeyError, SignedInceptionError,
 };
 pub use event::{
     AuthorizeDevice, CommitCredential, EVENT_VERSION, IdentityAction, IdentityEvent,
@@ -28,4 +30,5 @@ pub use event::{
 };
 pub use inception::{Inception, SignedInception};
 pub use signing::{KeySet, KeySignature, PublicKey, Signature};
+pub use state::{DeviceState, IdentityState, apply_inception};
 pub use verify::verify_signed_inception;

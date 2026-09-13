@@ -271,9 +271,9 @@ mod tests {
     use anyhow::Result;
     use minicbor::Encoder;
 
-    use crate::testing::{keyset, signature};
     use crate::{
         IdentityId, Inception, KeySet, RotateControl, SignedInception, derive_next_key_commitment,
+        testing::{keyset, signature},
     };
 
     use super::*;
